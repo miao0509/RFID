@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.List;
 
 public class Utils {
-    public static String jpgFilePath = "D:\\研究生时期\\rfid_test\\RFID\\jpg";
+    public static String jpgFilePath = "D:\\project\\RFID\\jpg";
 
     public static List<String> createTags(int dataSize, int tagSize) {
         Set<String> tags = new HashSet<>();
@@ -93,12 +93,15 @@ public class Utils {
         // 前景色 透明度
         plot.setForegroundAlpha(0.5f);
         // 其他设置 参考 CategoryPlot类
+
+        //折现对象
         LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
-        renderer.setBaseShapesVisible(true); // series 点（即数据点）可见
+        renderer.setBaseShapesVisible(false); // series 点（即数据点）可见
         renderer.setBaseLinesVisible(true); // series 点（即数据点）间有连线可见
         renderer.setUseSeriesOffset(true); // 设置偏移量
         renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-        renderer.setBaseItemLabelsVisible(true);
+        renderer.setBaseItemLabelsVisible(false); //设置每条折现上是否显示数值
+        renderer.setSeriesOutlineStroke(0,new BasicStroke(0.2F));
         return jfreechart;
     }
 
@@ -115,6 +118,14 @@ public class Utils {
         DefaultCategoryDataset defaultcategorydataset = new DefaultCategoryDataset();
         for (int i = 0; i < loads.size(); i++) {
             defaultcategorydataset.addValue(trough_put.get(i), "experiment", loads.get(i));
+        }
+        return defaultcategorydataset;
+    }
+    public static CategoryDataset createDoubleDataset(List<Double> loads, List<Double> trough_put,List<Double> pure_trough_put) {
+        DefaultCategoryDataset defaultcategorydataset = new DefaultCategoryDataset();
+        for (int i = 0; i < loads.size(); i++) {
+            defaultcategorydataset.addValue(trough_put.get(i), "slot", loads.get(i));
+            defaultcategorydataset.addValue(pure_trough_put.get(i), "pure", loads.get(i));
         }
         return defaultcategorydataset;
     }

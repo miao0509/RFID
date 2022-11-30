@@ -6,6 +6,8 @@ import org.jfree.data.category.CategoryDataset;
 //import sun.tools.jconsole.Plotter;
 
 import javax.swing.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,13 +21,13 @@ public class PureAloha extends JFrame {
         double load = 0.1;
         List<Double> loads = new ArrayList<>();
         List<Double> through_put = new ArrayList<>();
-        int i = 0;
         while (load <= 5) {
             loads.add(load);
             ArrayList<Double> pkts = generate_pkts(load, 10000);
             through_put.add(troughput(pkts, load));
             load = load + 0.1;
-            i = i + 1;
+            BigDecimal bigDecimal = new BigDecimal(load);
+            load = bigDecimal.setScale(2, RoundingMode.HALF_UP).doubleValue();
         }
         CategoryDataset dataset = Utils.createDoubleDataset(loads, through_put);
         JFreeChart freeChart = Utils.createChart(dataset, "纯ALOHA仿真", "装载", "效率");
