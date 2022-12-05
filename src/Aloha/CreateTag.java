@@ -21,10 +21,10 @@ public class CreateTag {
             list.add(tag);
         }
         //去重
-        System.out.println("去重前大小  " + list.size());
+//        System.out.println("去重前大小  " + list.size());
         list = list.stream().distinct().collect(Collectors.toList());
-        System.out.println("去重后大小  " + list.size());
-        System.out.println(list);
+//        System.out.println("去重后大小  " + list.size());
+//        System.out.println(list);
         try {
             File file = new File("D:/1.txt");
             FileWriter fr = new FileWriter(file, false);

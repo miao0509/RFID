@@ -1,5 +1,6 @@
 package Utils;
 
+import Aloha.DataSet;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -96,11 +97,11 @@ public class Utils {
 
         //折现对象
         LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
-        renderer.setBaseShapesVisible(false); // series 点（即数据点）可见
+        renderer.setBaseShapesVisible(true); // series 点（即数据点）可见
         renderer.setBaseLinesVisible(true); // series 点（即数据点）间有连线可见
         renderer.setUseSeriesOffset(true); // 设置偏移量
         renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-        renderer.setBaseItemLabelsVisible(false); //设置每条折现上是否显示数值
+        renderer.setBaseItemLabelsVisible(true); //设置每条折现上是否显示数值
         renderer.setSeriesOutlineStroke(0,new BasicStroke(0.2F));
         return jfreechart;
     }
@@ -126,6 +127,15 @@ public class Utils {
         for (int i = 0; i < loads.size(); i++) {
             defaultcategorydataset.addValue(trough_put.get(i), "slot", loads.get(i));
             defaultcategorydataset.addValue(pure_trough_put.get(i), "pure", loads.get(i));
+        }
+        return defaultcategorydataset;
+    }
+    public static CategoryDataset createDoubleDataset(Map<Integer, DataSet> map,int dataSize) {
+        DefaultCategoryDataset defaultcategorydataset = new DefaultCategoryDataset();
+        for (int i = 0; i < dataSize; i++) {
+            for (Map.Entry<Integer, DataSet> entry : map.entrySet()) {
+                defaultcategorydataset.addValue(entry.getValue().getTrough_put().get(i),entry.getKey(),entry.getValue().getTagNos().get(i));
+            }
         }
         return defaultcategorydataset;
     }
