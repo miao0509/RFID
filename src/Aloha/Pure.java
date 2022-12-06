@@ -1,6 +1,7 @@
 package Aloha;
 
 import Utils.Utils;
+import javafx.scene.chart.CategoryAxis;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 
@@ -11,7 +12,7 @@ public class Pure {
     public static int dataSize = 1;  // 数据集大小
     public static int tagSize = 48;  // 标签长度
     public static int frameSize = 64; // 时隙数
-    public static int CT = 10; // 每个值下做多少次实验
+    public static int CT = 1000; // 每个值下做多少次实验
 
     public static void main(String[] args) {
         Map<Integer, DataSet> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
@@ -58,12 +59,7 @@ public class Pure {
 
     public static double throughput(List<Tag> tags, int frameSize) {
         double success = 1;
-        Map<Integer, List<Tag>> map = tags.stream().collect(Collectors.groupingBy(Tag::getNum));
-//        for (int i = 1; i < tags.size(); i++) {
-//            if (tags.get(i).getNum() - tags.get(i - 1).getNum() != 0) {
-//                success++;
-//            }
-//        }
+        Map<Integer, List<Tag>> map = tags.stream().collect(Collectors.groupingBy(Tag::getNum)); // 标签按时隙分组
         for (List<Tag> tagInSlot : map.values()) {
             if (tagInSlot.size() == 1){   //如果时隙里只有一个标签 响应成功
                 success++;

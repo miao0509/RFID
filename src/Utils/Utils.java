@@ -12,11 +12,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-
 import java.awt.*;
 import java.io.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class Utils {
     public static String jpgFilePath = "D:\\project\\RFID\\jpg";
@@ -72,17 +71,20 @@ public class Utils {
                 xName, // categoryAxisLabel （category轴，横轴，X轴标签）
                 yName, // valueAxisLabel（value轴，纵轴，Y轴的标签）
                 categoryDataset, // dataset
-                PlotOrientation.VERTICAL, true, // legend
+                PlotOrientation.VERTICAL,
+                true, // 图例
                 false, // tooltips
                 false); // URLs
         jfreechart.getTitle().setFont(new Font("宋体", Font.PLAIN, 12));
         // 使用CategoryPlot设置各种参数。以下设置可以省略。
         CategoryPlot plot = (CategoryPlot) jfreechart.getPlot();
         CategoryAxis mDomainAxis = plot.getDomainAxis();
+//        CategoryAxis mDomainAxis = new MyCategoryAxis(10);
         //设置x轴标题的字体
         mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
         //设置x轴坐标字体
         mDomainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
+//        plot.setDomainAxis(mDomainAxis);
         //y轴
         ValueAxis mValueAxis = plot.getRangeAxis();
         //设置y轴标题字体
