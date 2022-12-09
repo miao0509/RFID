@@ -1,6 +1,7 @@
 package Utils;
 
 import Aloha.DataSet;
+import Aloha.Tag;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -49,6 +50,20 @@ public class Utils {
         }
         return list;
     }
+    public static List<Tag> readFile2Tag(String string) {
+        List<Tag> list = new ArrayList<Tag>();
+        try {
+            FileReader fr = new FileReader(string);
+            BufferedReader br = new BufferedReader(fr);
+            String s = "";
+            while ((s = br.readLine()) != null) {
+                list.add(new Tag(s));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public static void saveTags(Set<String> tags, String path) {
         try {
@@ -79,12 +94,10 @@ public class Utils {
         // 使用CategoryPlot设置各种参数。以下设置可以省略。
         CategoryPlot plot = (CategoryPlot) jfreechart.getPlot();
         CategoryAxis mDomainAxis = plot.getDomainAxis();
-//        CategoryAxis mDomainAxis = new MyCategoryAxis(10);
         //设置x轴标题的字体
         mDomainAxis.setLabelFont(new Font("宋体", Font.PLAIN, 15));
         //设置x轴坐标字体
         mDomainAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
-//        plot.setDomainAxis(mDomainAxis);
         //y轴
         ValueAxis mValueAxis = plot.getRangeAxis();
         //设置y轴标题字体
@@ -157,5 +170,28 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 寻找公共前缀
+     * @param tags
+     * @return
+     */
+    public static String commonPrefix(List<Tag> tags){
+        if (tags.isEmpty()){
+            return "";
+        }else if (tags.size()==1){
+            return tags.get(0).getTag();
+        }else {
+            tags.sort(Comparator.comparing(Tag::getTag));
+            return compareTwoString(tags.get(0).getTag(),tags.get(tags.size()-1).getTag());
+        }
+    }
+    public static String compareTwoString(String str1,String str2){
+        int i =  0;
+        while (str1.charAt(i)==str2.charAt(i)){
+            i++;
+        }
+        return str1.substring(0,i);
     }
 }

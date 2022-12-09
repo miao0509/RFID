@@ -1,45 +1,50 @@
 package Tree;
 
+import Aloha.CreateTag;
+import Aloha.Tag;
 import Utils.Utils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-public class qt {
+public class ct {
+    public static Map<String, List<Tag>> CT = new HashMap<>(); // 碰撞树  key->前缀    val->前缀下的子树
     public static Integer tagSize = 6;
-    // 将二进制前缀与列表中的ID进行比较
-    public int seek(String sign, List<String> list) {
-        int count = 0;
-        int value = 0;
-        String first = "";// 记录识别出第一个标签的id;
+
+    /**
+     * 将公共前缀与列表中的ID进行比较
+     *
+     * @param sign 公共前缀
+     * @param list 分支内的标签
+     * @return
+     */
+    public CTResult seek(String sign, List<Tag> list) {
+        CTResult result;
+        List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
+        List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).startsWith(sign)) {
-                count++;
-                if (count == 1) {
-                    first = list.get(i);
-                }
+            if (sign.length() == tagSize) {
+                System.out.print("发出信号为 " + sign + "  识别成功");
+                return new CTResult(1);
+            }
+            if (list.get(i).getTag().startsWith(sign + 0)) {
+                collection0.add(list.get(i));
+            } else if (list.get(i).getTag().startsWith(sign + 1)){
+                collection1.add(list.get(i));
             }
         }
-        if (count == 0) {
-            System.out.print("发出信号为 " + sign + "  无响应");
-        } else if (count == 1) {
-            System.out.print("发出信号为 " + sign + "  识别成功");
-            list.remove(first);
-            value = 1;
-        } else {
-            value = 2;
-            System.out.print("发出信号为 " + sign + "  冲突个数" + count);
-        }
-        return value;
+
+        result =new CTResult(2,collection0,collection1);
+        System.out.print("发出信号为 " + sign + "  冲突个数" + (int)(collection1.size()+collection0.size()));
+
+        return result;
     }
 
     public static void main(String[] args) {
-        qt qt = new qt();
+        ct qt = new ct();
         List<Integer> times = new ArrayList<Integer>();
         List<Integer> all = new ArrayList<Integer>();
         System.out.println("仿真次数");
@@ -50,28 +55,28 @@ public class qt {
             Scanner sc = new Scanner(System.in);
             int n = sc.nextInt();
             all.add(n);
-            List<String> list = Utils.createTags(n, tagSize);
+            List<Tag> tags = CreateTag.createTags(n, tagSize);
             List<String> signlist = new ArrayList<String>();
             String sign = "";// 二进制前缀
-            int value = 0;//  返回值
+            CTResult value;//  返回值
             int time = 0;// 次数
-            signlist.add(sign + "0");
-            signlist.add(sign + "1");
+            String commonPrefix = Utils.commonPrefix(tags);
+            signlist.add(commonPrefix);
             int success = 0;// 成功个数
             while (signlist.size() > 0) {
                 sign = signlist.get(0);
-                value = qt.seek(sign, list);
+                value = qt.seek(sign, tags);
                 time++;
                 signlist.remove(sign);
-                switch (value) {
+                switch (value.getResult()) {
                     case 0:// 无响应
                         break;
                     case 1:// 识别成功
                         success++;
                         break;
-                    case 2:
-                        signlist.add(0, sign + "0");
-                        signlist.add(1, sign + "1");
+                    default:
+                        signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
+                        signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
                         break;
                 }
                 System.out.println("    当前成功识别总数为：" + success);

@@ -30,13 +30,17 @@ public class Pure {
                 }
                 trough_put.add(throughput/CT);
                 tagNos.add(dataSize);
-                dataSize+=10;
+                if (dataSize == 1 ){
+                    dataSize+=9;
+                }else {
+                    dataSize+=10;
+                }
             }
             map.put(frameSize, dataSet);
             frameSize = frameSize *2;
             dataSize = 1;
         }
-        CategoryDataset dataset = Utils.createDoubleDataset(map, 50);
+        CategoryDataset dataset = Utils.createDoubleDataset(map, 51);
         JFreeChart freeChart = Utils.createChart(dataset, "纯ALOHA仿真", "标签数", "效率");
         Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\pureAloha1.jpg");
 
