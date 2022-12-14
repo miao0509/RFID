@@ -1,5 +1,7 @@
 package Aloha;
 
+import Tree.DataSet2CT;
+import Tree.ct;
 import Utils.Utils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -13,6 +15,7 @@ public class SA {
     public static int frameSize = 64; // 时隙数
     public static int CT = 1000; // 每个值下做多少次实验
 
+
     public static void main(String[] args) {
         Map<Integer, DataSet2SA> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
         int size = 0 ;
@@ -25,9 +28,16 @@ public class SA {
                 double throughput = 0;
                 List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                 while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
+                    int success = 0;   //成功识别个数
+                    int time = 0; //花费时隙数
                     generateRandom(tags, frameSize);  //给标签写入随机数 用来在不同时隙响应
-                    throughput += throughput(tags, frameSize);  //统计吞吐量
+                    Map<Integer, List<Tag>> SAMap = SAProcess(tags,success);//  SA处理后的标签集
+                    for ( Map.Entry<Integer, List<Tag>> entry : SAMap.entrySet()) { // 遍历每个时隙的碰撞标签
+                        time+= ct.CTProcess(entry.getValue(), success);
+                    }
+
                 }
+
                 trough_put.add(throughput/CT);
                 tagNums.add(dataSize);
                 if (dataSize == 1 ){
@@ -42,6 +52,7 @@ public class SA {
             dataSize = 1;
         }
         CategoryDataset dataset = Utils.createDoubleDataset(map, size);
+
         JFreeChart freeChart = Utils.createChart(dataset, "时隙ALOHA仿真", "标签数", "效率");
         Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\pureAloha1.jpg");
 
@@ -60,15 +71,16 @@ public class SA {
         tags.sort(Comparator.comparingInt(Tag::getNum));
     }
 
-    public static double throughput(List<Tag> tags, int frameSize) {
-        double success = 1;
+    public static Map<Integer, List<Tag>> SAProcess(List<Tag> tags,int success) {  // 首先进行SA算法 把所有成功标签移除
         Map<Integer, List<Tag>> map = tags.stream().collect(Collectors.groupingBy(Tag::getNum)); // 标签按时隙分组
-        for (List<Tag> tagInSlot : map.values()) {
-            if (tagInSlot.size() == 1){   //如果时隙里只有一个标签 响应成功
-                success++;
+        for (Map.Entry<Integer, List<Tag>> entry : map.entrySet()) {
+            if (entry.getValue().size() == 1) {   //如果时隙里只有一个标签 响应成功  移除标签
+                ++success;
+                map.remove(entry.getKey());
             }
         }
-        return success / frameSize;
+        return map;
     }
+
 
 }
