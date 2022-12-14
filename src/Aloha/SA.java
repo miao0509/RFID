@@ -1,14 +1,13 @@
 package Aloha;
 
 import Utils.Utils;
-import javafx.scene.chart.CategoryAxis;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Pure {
+public class SA {
     public static int dataSize = 1;  // 数据集大小
     public static int tagSize = 48;  // 标签长度
     public static int frameSize = 64; // 时隙数

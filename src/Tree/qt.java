@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class qt {
-    public static Integer tagSize = 6;
+    public static Integer tagSize = 96;
     // 将二进制前缀与列表中的ID进行比较
     public int seek(String sign, List<String> list) {
         int count = 0;

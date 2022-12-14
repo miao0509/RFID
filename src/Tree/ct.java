@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ct {
     public static Map<String, List<Tag>> CT = new HashMap<>(); // 碰撞树  key->前缀    val->前缀下的子树
-    public static Integer tagSize = 6;
+    public static Integer tagSize = 96;
 
     /**
      * 将公共前缀与列表中的ID进行比较
@@ -38,7 +38,7 @@ public class ct {
         }
 
         result =new CTResult(2,collection0,collection1);
-        System.out.print("发出信号为 " + sign + "  冲突个数" + (int)(collection1.size()+collection0.size()));
+        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size()+collection0.size()));
 
         return result;
     }
@@ -85,8 +85,8 @@ public class ct {
             System.out.println("识别次数为" + time + "次，标签总数为：" + success + "  识别完成！");
         }
         CategoryDataset intDataset = Utils.createIntDataset(all, times);
-        JFreeChart chart = Utils.createChart(intDataset, "二分查找树", "识别数量", "识别次数");
-        Utils.saveAsFile(chart, Utils.jpgFilePath + "\\qt.jpg");
+        JFreeChart chart = Utils.createChart(intDataset, "碰撞树", "识别数量", "识别次数");
+        Utils.saveAsFile(chart, Utils.jpgFilePath + "\\ct.jpg");
     }
 
 }
