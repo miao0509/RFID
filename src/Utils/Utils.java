@@ -1,6 +1,6 @@
 package Utils;
 
-import Aloha.DataSet;
+import Aloha.DataSet2SA;
 import Aloha.Tag;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -145,11 +145,11 @@ public class Utils {
         }
         return defaultcategorydataset;
     }
-    public static CategoryDataset createDoubleDataset(Map<Integer, DataSet> map,int dataSize) {
+    public static CategoryDataset createDoubleDataset(Map<Integer, DataSet2SA> map, int dataSize) {
         DefaultCategoryDataset defaultcategorydataset = new DefaultCategoryDataset();
         for (int i = 0; i < dataSize; i++) {
-            for (Map.Entry<Integer, DataSet> entry : map.entrySet()) {
-                defaultcategorydataset.addValue(entry.getValue().getTrough_put().get(i),entry.getKey(),entry.getValue().getTagNos().get(i));
+            for (Map.Entry<Integer, DataSet2SA> entry : map.entrySet()) {
+                defaultcategorydataset.addValue(entry.getValue().getTrough_put().get(i),entry.getKey(),entry.getValue().getTagNums().get(i));
             }
         }
         return defaultcategorydataset;

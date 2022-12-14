@@ -14,11 +14,12 @@ public class SA {
     public static int CT = 1000; // 每个值下做多少次实验
 
     public static void main(String[] args) {
-        Map<Integer, DataSet> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
+        Map<Integer, DataSet2SA> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
+        int size = 0 ;
         while (frameSize <=256) {  // 一帧大小
             ArrayList<Double> trough_put = new ArrayList<>();
-            ArrayList<Integer> tagNos = new ArrayList<>();
-            DataSet dataSet = new DataSet(trough_put, tagNos);
+            ArrayList<Integer> tagNums = new ArrayList<>();
+            DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums);
             while (dataSize <= 500) {
                 int i = 0;
                 double throughput = 0;
@@ -28,19 +29,20 @@ public class SA {
                     throughput += throughput(tags, frameSize);  //统计吞吐量
                 }
                 trough_put.add(throughput/CT);
-                tagNos.add(dataSize);
+                tagNums.add(dataSize);
                 if (dataSize == 1 ){
                     dataSize+=9;
                 }else {
                     dataSize+=10;
                 }
             }
-            map.put(frameSize, dataSet);
+            size = tagNums.size();
+            map.put(frameSize, dataSet2SA);
             frameSize = frameSize *2;
             dataSize = 1;
         }
-        CategoryDataset dataset = Utils.createDoubleDataset(map, 51);
-        JFreeChart freeChart = Utils.createChart(dataset, "纯ALOHA仿真", "标签数", "效率");
+        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
+        JFreeChart freeChart = Utils.createChart(dataset, "时隙ALOHA仿真", "标签数", "效率");
         Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\pureAloha1.jpg");
 
     }
@@ -50,14 +52,12 @@ public class SA {
      *
      * @param tags      标签数目
      * @param frameSize 帧大小
-     * @return 写入随机数后的标签 按从小到大时隙排序
-     */
-    public static List<Tag> generateRandom(List<Tag> tags, int frameSize) {
+     * */
+    public static void generateRandom(List<Tag> tags, int frameSize) {
         for (Tag tag : tags) {
             tag.setNum((int) (Math.ceil(Math.random() * (frameSize -1))));
         }
         tags.sort(Comparator.comparingInt(Tag::getNum));
-        return tags;
     }
 
     public static double throughput(List<Tag> tags, int frameSize) {

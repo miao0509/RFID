@@ -45,8 +45,8 @@ public class ct {
 
     public static void main(String[] args) {
         ct qt = new ct();
-        List<Integer> times = new ArrayList<Integer>();
-        List<Integer> all = new ArrayList<Integer>();
+        List<Integer> times = new ArrayList<Integer>();   // 节点数 花费总次数
+        List<Integer> TagNums = new ArrayList<Integer>();  //标签数量
         System.out.println("仿真次数");
         Scanner scanner = new Scanner(System.in);
         int count = scanner.nextInt();
@@ -54,15 +54,15 @@ public class ct {
             System.out.println("标签总数为");
             Scanner sc = new Scanner(System.in);
             int n = sc.nextInt();
-            all.add(n);
-            List<Tag> tags = CreateTag.createTags(n, tagSize);
-            List<String> signlist = new ArrayList<String>();
+            TagNums.add(n);
+            List<Tag> tags = CreateTag.createTags(n, tagSize);   // 仿真标签
+            List<String> signlist = new ArrayList<String>();  // 前缀栈
             String sign = "";// 二进制前缀
             CTResult value;//  返回值
-            int time = 0;// 次数
-            String commonPrefix = Utils.commonPrefix(tags);
+            int time = 0;// 标签数对应的查找次数
+            String commonPrefix = Utils.commonPrefix(tags);   // 公共前缀
             signlist.add(commonPrefix);
-            int success = 0;// 成功个数
+            int success = 0;// 已识别标签个数
             while (signlist.size() > 0) {
                 sign = signlist.get(0);
                 value = qt.seek(sign, tags);
@@ -84,7 +84,7 @@ public class ct {
             times.add(time);
             System.out.println("识别次数为" + time + "次，标签总数为：" + success + "  识别完成！");
         }
-        CategoryDataset intDataset = Utils.createIntDataset(all, times);
+        CategoryDataset intDataset = Utils.createIntDataset(TagNums, times);
         JFreeChart chart = Utils.createChart(intDataset, "碰撞树", "识别数量", "识别次数");
         Utils.saveAsFile(chart, Utils.jpgFilePath + "\\ct.jpg");
     }
