@@ -189,7 +189,7 @@ public class Utils {
     }
     public static String compareTwoString(String str1,String str2){
         int i =  0;
-        while (str1.charAt(i)==str2.charAt(i)){
+        while (i <str1.length() &&str1.charAt(i)==str2.charAt(i)){
             i++;
         }
         return str1.substring(0,i);

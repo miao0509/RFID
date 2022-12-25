@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ct {
     public static Map<String, List<Tag>> CT = new HashMap<>(); // 碰撞树  key->前缀    val->前缀下的子树
-    public static Integer tagSize = 96;
+    public static Integer tagSize = 8;
 
     /**
      * 将公共前缀与列表中的ID进行比较
@@ -21,7 +21,7 @@ public class ct {
      * @param list 分支内的标签
      * @return
      */
-    public static CTResult seek(String sign, List<Tag> list) {
+    public static CTResult seek(String sign, List<Tag> list,int tagSize) {
         CTResult result;
         List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
         List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
@@ -65,7 +65,7 @@ public class ct {
             int success = 0;// 已识别标签个数
             while (signlist.size() > 0) {
                 sign = signlist.get(0);
-                value = ct.seek(sign, tags);
+                value = seek(sign, tags,tagSize);
                 time++;
                 signlist.remove(sign);
                 switch (value.getResult()) {
@@ -89,7 +89,7 @@ public class ct {
         Utils.saveAsFile(chart, Utils.jpgFilePath + "\\ct.jpg");
     }
 
-    public static int CTProcess(List<Tag> tags,int success) {
+    public static int CTProcess(List<Tag> tags,int success,int tagSize) {
         List<String> signlist = new ArrayList<String>();  // 前缀栈
         String sign = "";// 二进制前缀
         CTResult value;//  返回值
@@ -98,7 +98,7 @@ public class ct {
         signlist.add(commonPrefix);
         while (signlist.size() > 0) {
             sign = signlist.get(0);
-            value = seek(sign, tags);
+            value = seek(sign, tags,tagSize);
             time++;
             signlist.remove(sign);
             switch (value.getResult()) {

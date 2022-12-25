@@ -1,6 +1,7 @@
 package Aloha;
 
 import Tree.DataSet2CT;
+import Tree.SAProcess;
 import Tree.ct;
 import Utils.Utils;
 import org.jfree.chart.JFreeChart;
@@ -28,12 +29,11 @@ public class SA {
                 double throughput = 0;
                 List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                 while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
-                    int success = 0;   //成功识别个数
                     int time = 0; //花费时隙数
                     generateRandom(tags, frameSize);  //给标签写入随机数 用来在不同时隙响应
-                    Map<Integer, List<Tag>> SAMap = SAProcess(tags,success);//  SA处理后的标签集
-                    for ( Map.Entry<Integer, List<Tag>> entry : SAMap.entrySet()) { // 遍历每个时隙的碰撞标签
-                        time+= ct.CTProcess(entry.getValue(), success);
+                    SAProcess saProcess = SAProcess(tags);//  SA处理后的标签集
+                    for ( Map.Entry<Integer, List<Tag>> entry : saProcess.getMap().entrySet()) { // 遍历每个时隙的碰撞标签
+                        time+= ct.CTProcess(entry.getValue(), saProcess.getSuccess(),tagSize);
                     }
 
                 }
@@ -71,15 +71,18 @@ public class SA {
         tags.sort(Comparator.comparingInt(Tag::getNum));
     }
 
-    public static Map<Integer, List<Tag>> SAProcess(List<Tag> tags,int success) {  // 首先进行SA算法 把所有成功标签移除
+    public static SAProcess SAProcess(List<Tag> tags) {  // 首先进行SA算法 把所有成功标签移除
+        int success = 0;
         Map<Integer, List<Tag>> map = tags.stream().collect(Collectors.groupingBy(Tag::getNum)); // 标签按时隙分组
-        for (Map.Entry<Integer, List<Tag>> entry : map.entrySet()) {
-            if (entry.getValue().size() == 1) {   //如果时隙里只有一个标签 响应成功  移除标签
-                ++success;
-                map.remove(entry.getKey());
+        Iterator<Map.Entry<Integer, List<Tag>>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<Integer, List<Tag>> next = iterator.next();
+            if (next.getValue().size() == 1){
+                success++;
+                iterator.remove();
             }
         }
-        return map;
+        return new SAProcess(map,success);
     }
 
 
