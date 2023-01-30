@@ -16,38 +16,14 @@ public class ct {
     public static Integer tagSize = 96;
     public static int frameSize = 64; // 时隙数
     public static int CTCount = 1000; // 每个值下做多少次实验
-
-    /**
-     * 将公共前缀与列表中的ID进行比较
-     *
-     * @param sign 公共前缀
-     * @param list 分支内的标签
-     * @return
-     */
-    public static CTResult seek(String sign, List<Tag> list, int tagSize) {
-        CTResult result;
-        List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
-        List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
-        for (int i = 0; i < list.size(); i++) {
-            if (sign.length() == tagSize) {
-//                System.out.print("发出信号为 " + sign + "  识别成功");
-                return new CTResult(1);
-            }
-            if (list.get(i).getTag().startsWith(sign + 0)) {
-                collection0.add(list.get(i));
-            } else if (list.get(i).getTag().startsWith(sign + 1)) {
-                collection1.add(list.get(i));
-            }
-        }
-
-        result = new CTResult(2, collection0, collection1);
-//        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size() + collection0.size()));
-
-        return result;
-    }
-
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
+        testThough_put();
+        long end = System.currentTimeMillis();
+        System.out.println("花费的时间：   " +  (end - start)/100);
+    }
+
+    public static void testThough_put() {
         Map<Integer, DataSet2SA> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
         int size = 0;
         ArrayList<Double> trough_put = new ArrayList<>();
@@ -56,11 +32,11 @@ public class ct {
         while (dataSize <= 500) {
             int i = 0;
             List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
-            double efficiency = 0.0;
+            Result result = new Result();
             while (i++ < CTCount) { // 每个对应帧数下做CT次实验 取平均值
-                efficiency += CTProcess(tags, 0, tagSize).efficiency;
+                result.efficiency += CTProcess(tags, 0, tagSize).efficiency;
             }
-            trough_put.add(efficiency / CTCount);
+            trough_put.add(result.efficiency / CTCount);
             tagNums.add(dataSize);
             if (dataSize == 1) {
                 dataSize += 9;
@@ -71,14 +47,9 @@ public class ct {
         size = tagNums.size();
         map.put(frameSize, dataSet2SA);
 
-        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
-        JFreeChart freeChart = Utils.createChart(dataset, "CT", "标签数", "效率");
-        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\CT1.jpg");
-        long end = System.currentTimeMillis();
-        System.out.println("花费的时间：   " +  (end - start)/1000);
-    }
-
-    public static void testThough_put() {
+//        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
+//        JFreeChart freeChart = Utils.createChart(dataset, "CT", "标签数", "效率");
+//        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\CT1.jpg");
 
     }
 
@@ -165,6 +136,34 @@ public class ct {
         }
         result.time = time;
         result.efficiency = (double) tags.size() / time;
+        return result;
+    }
+    /**
+     * 将公共前缀与列表中的ID进行比较
+     *
+     * @param sign 公共前缀
+     * @param list 分支内的标签
+     * @return
+     */
+    public static CTResult seek(String sign, List<Tag> list, int tagSize) {
+        CTResult result;
+        List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
+        List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
+        for (int i = 0; i < list.size(); i++) {
+            if (sign.length() == tagSize) {
+//                System.out.print("发出信号为 " + sign + "  识别成功");
+                return new CTResult(1);
+            }
+            if (list.get(i).getTag().startsWith(sign + 0)) {
+                collection0.add(list.get(i));
+            } else if (list.get(i).getTag().startsWith(sign + 1)) {
+                collection1.add(list.get(i));
+            }
+        }
+
+        result = new CTResult(2, collection0, collection1);
+//        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size() + collection0.size()));
+
         return result;
     }
 

@@ -20,14 +20,12 @@ public class SAT {
         long start = System.currentTimeMillis();
         test1();
         long end = System.currentTimeMillis();
-        System.out.println("花费的时间：   " +  (end - start)/1000);
-//        List<Tag> tags = CreateTag.createTags(10, 6);
-//        SAT(10,6,8,tags);
+        System.out.println("SAT花费的时间：   " +  (end - start)/100);
     }
     public static void test1(){
         Map<Integer, DataSet2SA> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
         int size = 0 ; // 图有多少个横坐标
-        while (frameSize <=256) {  // 一帧大小
+//        while (frameSize <=256) {  // 一帧大小
             ArrayList<Double> trough_put = new ArrayList<>();
             ArrayList<Integer> tagNums = new ArrayList<>();
             DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums);
@@ -36,7 +34,7 @@ public class SAT {
                 List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                 Result sat = new Result();
                 while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
-                    sat = SAT(dataSize, tagSize, frameSize, tags);
+                    sat.efficiency = SAT(dataSize, tagSize, frameSize, tags).efficiency;
                 }
                 trough_put.add(sat.efficiency/CT);
                 tagNums.add(dataSize);
@@ -49,12 +47,12 @@ public class SAT {
             size = tagNums.size();
             map.put(frameSize, dataSet2SA);
             frameSize = frameSize *2;
-            dataSize = 1;
-        }
-        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
-
-        JFreeChart freeChart = Utils.createChart(dataset, "SAT", "标签数", "效率");
-        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\SAT1.jpg");
+//            dataSize = 1;
+//        }
+//        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
+//
+//        JFreeChart freeChart = Utils.createChart(dataset, "SAT", "标签数", "效率");
+//        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\SAT1.jpg");
     }
 
     public static Result SAT(int dataSize, int tagSize, int frameSize, List<Tag> tags ) {
@@ -78,7 +76,7 @@ public class SAT {
         signlist.add(tags.prefix);
         while (signlist.size() > 0) {
             sign = signlist.get(0);
-            value = seek(sign, tags.getTags(), tagSize);
+            value = ct.seek(sign, tags.getTags(), tagSize);
             result.time++;
             signlist.remove(sign);
             switch (value.getResult()) {
@@ -101,28 +99,6 @@ public class SAT {
             }
 //            System.out.println("    当前成功识别总数为：" + satResult.success);
         }
-        return result;
-    }
-
-    public static CTResult seek(String sign, List<Tag> list, int tagSize) {
-        CTResult result;
-        List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
-        List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
-        for (int i = 0; i < list.size(); i++) {
-            if (sign.length() == tagSize) {
-//                System.out.print("发出信号为 " + sign + "  识别成功");
-                return new CTResult(1);
-            }
-            if (list.get(i).getTag().startsWith(sign + 0)) {
-                collection0.add(list.get(i));
-            } else if (list.get(i).getTag().startsWith(sign + 1)) {
-                collection1.add(list.get(i));
-            }
-        }
-
-        result = new CTResult(2, collection0, collection1);
-//        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size() + collection0.size()));
-
         return result;
     }
 
