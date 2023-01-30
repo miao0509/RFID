@@ -33,7 +33,7 @@ public class SA {
                     generateRandom(tags, frameSize);  //给标签写入随机数 用来在不同时隙响应
                     SAProcess saProcess = SAProcess(tags);//  SA处理后的标签集
                     for ( Map.Entry<Integer, List<Tag>> entry : saProcess.getMap().entrySet()) { // 遍历每个时隙的碰撞标签
-                        time+= ct.CTProcess(entry.getValue(), saProcess.getSuccess(),tagSize);
+                        time+= ct.CTProcess(entry.getValue(), saProcess.getSuccess(),tagSize).time;
                     }
 
                 }

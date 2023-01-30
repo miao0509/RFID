@@ -1,18 +1,21 @@
 package Tree;
 
 import Aloha.CreateTag;
+import Aloha.DataSet2SA;
 import Aloha.Tag;
+import Test.Result;
 import Utils.Utils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.*;
 
 public class ct {
     public static Map<String, List<Tag>> CT = new HashMap<>(); // 碰撞树  key->前缀    val->前缀下的子树
-    public static Integer tagSize = 8;
+    public static int dataSize = 1;  // 数据集大小
+    public static Integer tagSize = 96;
+    public static int frameSize = 64; // 时隙数
+    public static int CTCount = 1000; // 每个值下做多少次实验
 
     /**
      * 将公共前缀与列表中的ID进行比较
@@ -21,13 +24,13 @@ public class ct {
      * @param list 分支内的标签
      * @return
      */
-    public static CTResult seek(String sign, List<Tag> list,int tagSize) {
+    public static CTResult seek(String sign, List<Tag> list, int tagSize) {
         CTResult result;
         List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
         List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
         for (int i = 0; i < list.size(); i++) {
             if (sign.length() == tagSize) {
-                System.out.print("发出信号为 " + sign + "  识别成功");
+//                System.out.print("发出信号为 " + sign + "  识别成功");
                 return new CTResult(1);
             }
             if (list.get(i).getTag().startsWith(sign + 0)) {
@@ -38,13 +41,48 @@ public class ct {
         }
 
         result = new CTResult(2, collection0, collection1);
-        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size() + collection0.size()));
+//        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size() + collection0.size()));
 
         return result;
     }
 
     public static void main(String[] args) {
-        ct ct = new ct();
+        long start = System.currentTimeMillis();
+        Map<Integer, DataSet2SA> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
+        int size = 0;
+        ArrayList<Double> trough_put = new ArrayList<>();
+        ArrayList<Integer> tagNums = new ArrayList<>();
+        DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums);
+        while (dataSize <= 500) {
+            int i = 0;
+            List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
+            double efficiency = 0.0;
+            while (i++ < CTCount) { // 每个对应帧数下做CT次实验 取平均值
+                efficiency += CTProcess(tags, 0, tagSize).efficiency;
+            }
+            trough_put.add(efficiency / CTCount);
+            tagNums.add(dataSize);
+            if (dataSize == 1) {
+                dataSize += 9;
+            } else {
+                dataSize += 10;
+            }
+        }
+        size = tagNums.size();
+        map.put(frameSize, dataSet2SA);
+
+        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
+        JFreeChart freeChart = Utils.createChart(dataset, "CT", "标签数", "效率");
+        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\CT1.jpg");
+        long end = System.currentTimeMillis();
+        System.out.println("花费的时间：   " +  (end - start)/1000);
+    }
+
+    public static void testThough_put() {
+
+    }
+
+    public static void testCount() {
         List<Integer> times = new ArrayList<Integer>();   // 节点数 花费总次数
         List<Integer> TagNums = new ArrayList<Integer>();  //标签数量
         System.out.println("仿真次数");
@@ -65,7 +103,7 @@ public class ct {
             int success = 0;// 已识别标签个数
             while (signlist.size() > 0) {
                 sign = signlist.get(0);
-                value = seek(sign, tags,tagSize);
+                value = seek(sign, tags, tagSize);
                 time++;
                 signlist.remove(sign);
                 switch (value.getResult()) {
@@ -89,7 +127,9 @@ public class ct {
         Utils.saveAsFile(chart, Utils.jpgFilePath + "\\ct.jpg");
     }
 
-    public static int CTProcess(List<Tag> tags,int success,int tagSize) {
+    public static Result CTProcess(List<Tag> tags, int success, int tagSize) {
+        Result result = new Result();
+        result.success = success;
         List<String> signlist = new ArrayList<String>();  // 前缀栈
         String sign = "";// 二进制前缀
         CTResult value;//  返回值
@@ -98,23 +138,34 @@ public class ct {
         signlist.add(commonPrefix);
         while (signlist.size() > 0) {
             sign = signlist.get(0);
-            value = seek(sign, tags,tagSize);
+            value = seek(sign, tags, tagSize);
             time++;
             signlist.remove(sign);
             switch (value.getResult()) {
                 case 0:// 无响应
                     break;
                 case 1:// 识别成功
-                    success++;
+                    result.success++;
                     break;
                 default:
-                    signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
-                    signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
+
+                    if (value.getPrefix0().size() == 1){
+                        success +=2; //改进的CT算法 如果只有一位碰撞 成功识别两个标签
+                    }else {
+                        signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
+                        signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
+                    }
                     break;
+
+                    /*signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
+                    signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
+                    break;*/
             }
-            System.out.println("    当前成功识别总数为：" + success);
+//            System.out.println("    当前成功识别总数为：" + success);
         }
-        return time;
+        result.time = time;
+        result.efficiency = (double) tags.size() / time;
+        return result;
     }
 
 }
