@@ -145,11 +145,24 @@ public class Utils {
         }
         return defaultcategorydataset;
     }
-    public static CategoryDataset createDoubleDataset(Map<Integer, DataSet2SA> map, int dataSize) {
+
+    /**
+     *
+     * @param map
+     * @param dataSize
+     * @param flag 1 吞吐率   2 通信量 3 耗时
+     * @return
+     */
+    public static CategoryDataset createDoubleDataset(Map<Integer, DataSet2SA> map, int dataSize,int flag) {
         DefaultCategoryDataset defaultcategorydataset = new DefaultCategoryDataset();
         for (int i = 0; i < dataSize; i++) {
             for (Map.Entry<Integer, DataSet2SA> entry : map.entrySet()) {
-                defaultcategorydataset.addValue(entry.getValue().getTrough_put().get(i),entry.getKey(),entry.getValue().getTagNums().get(i));
+                if (flag == 1){
+                    defaultcategorydataset.addValue(entry.getValue().getTrough_put().get(i),entry.getKey(),entry.getValue().getTagNums().get(i));
+                }else if (flag ==2){
+                    defaultcategorydataset.addValue(entry.getValue().getTraffic().get(i),entry.getKey(),entry.getValue().getTagNums().get(i));
+                }else if (flag ==3)
+                    defaultcategorydataset.addValue(entry.getValue().getTakeTime().get(i),entry.getKey(),entry.getValue().getTagNums().get(i));
             }
         }
         return defaultcategorydataset;

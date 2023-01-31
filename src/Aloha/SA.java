@@ -1,6 +1,5 @@
 package Aloha;
 
-import Tree.DataSet2CT;
 import Tree.SAProcess;
 import Tree.ct;
 import Utils.Utils;
@@ -23,7 +22,7 @@ public class SA {
         while (frameSize <=256) {  // 一帧大小
             ArrayList<Double> trough_put = new ArrayList<>();
             ArrayList<Integer> tagNums = new ArrayList<>();
-            DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums);
+            DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums,null,null);
             while (dataSize <= 500) {
                 int i = 0;
                 double throughput = 0;
@@ -51,7 +50,7 @@ public class SA {
             frameSize = frameSize *2;
             dataSize = 1;
         }
-        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
+        CategoryDataset dataset = Utils.createDoubleDataset(map, size,1);
 
         JFreeChart freeChart = Utils.createChart(dataset, "时隙ALOHA仿真", "标签数", "效率");
         Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\pureAloha1.jpg");

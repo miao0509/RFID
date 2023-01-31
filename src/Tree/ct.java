@@ -27,29 +27,42 @@ public class ct {
         Map<Integer, DataSet2SA> map = new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
         int size = 0;
         ArrayList<Double> trough_put = new ArrayList<>();
+        ArrayList<Long> traffic = new ArrayList<>();
+        ArrayList<Long> takeTime = new ArrayList<>();
         ArrayList<Integer> tagNums = new ArrayList<>();
-        DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums);
+        DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums,traffic,takeTime);
         while (dataSize <= 500) {
+            long start = System.currentTimeMillis();
             int i = 0;
             List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
             Result result = new Result();
             while (i++ < CTCount) { // 每个对应帧数下做CT次实验 取平均值
                 result.efficiency += CTProcess(tags, 0, tagSize).efficiency;
+                result.traffic +=CTProcess(tags, 0, tagSize).traffic;
             }
             trough_put.add(result.efficiency / CTCount);
+            traffic.add(result.traffic/CTCount);
             tagNums.add(dataSize);
             if (dataSize == 1) {
                 dataSize += 9;
             } else {
                 dataSize += 10;
             }
+            long end = System.currentTimeMillis();
+            takeTime.add((end-start));
         }
         size = tagNums.size();
         map.put(frameSize, dataSet2SA);
 
-//        CategoryDataset dataset = Utils.createDoubleDataset(map, size);
-//        JFreeChart freeChart = Utils.createChart(dataset, "CT", "标签数", "效率");
-//        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\CT1.jpg");
+        CategoryDataset dataset1 = Utils.createDoubleDataset(map, size,1);
+        JFreeChart freeChart1 = Utils.createChart(dataset1, "CT吞吐量", "标签数", "效率");
+        Utils.saveAsFile(freeChart1, Utils.jpgFilePath + "\\CT吞吐量.jpg");
+        CategoryDataset dataset2 = Utils.createDoubleDataset(map, size,2);
+        JFreeChart freeChart2 = Utils.createChart(dataset2, "CT通信量", "标签数", "通信量");
+        Utils.saveAsFile(freeChart2, Utils.jpgFilePath + "\\CT通信量.jpg");
+        CategoryDataset dataset3 = Utils.createDoubleDataset(map, size,3);
+        JFreeChart freeChart3 = Utils.createChart(dataset3, "CT耗时", "标签数", "耗时");
+        Utils.saveAsFile(freeChart3, Utils.jpgFilePath + "\\CT耗时.jpg");
 
     }
 
@@ -109,6 +122,7 @@ public class ct {
         signlist.add(commonPrefix);
         while (signlist.size() > 0) {
             sign = signlist.get(0);
+            result.traffic +=sign.length();
             value = seek(sign, tags, tagSize);
             time++;
             signlist.remove(sign);
@@ -119,8 +133,7 @@ public class ct {
                     result.success++;
                     break;
                 default:
-
-                    if (value.getPrefix0().size() == 1){
+                    if (value.getPrefix0().size() == 1&&value.getPrefix1().size() == 1){
                         success +=2; //改进的CT算法 如果只有一位碰撞 成功识别两个标签
                     }else {
                         signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
