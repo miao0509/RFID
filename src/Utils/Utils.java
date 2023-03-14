@@ -11,8 +11,13 @@ import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.ui.HorizontalAlignment;
+import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.VerticalAlignment;
+
 import java.awt.*;
 import java.io.*;
 import java.util.List;
@@ -32,7 +37,6 @@ public class Utils {
             }
             tags.add(s.toString());
         }
-        System.out.println(tags.size());
         return new ArrayList<>(tags);
     }
 
@@ -90,6 +94,14 @@ public class Utils {
                 true, // 图例
                 false, // tooltips
                 false); // URLs
+        LegendTitle legend = jfreechart.getLegend();
+
+        legend.setHorizontalAlignment(HorizontalAlignment.RIGHT);
+        legend.setPosition(RectangleEdge.TOP);
+        legend.setBorder(0,0,0,0);
+        legend.setPadding(0,0,0,0);
+        legend.setVerticalAlignment(VerticalAlignment.BOTTOM);
+
         jfreechart.getTitle().setFont(new Font("宋体", Font.PLAIN, 12));
         // 使用CategoryPlot设置各种参数。以下设置可以省略。
         CategoryPlot plot = (CategoryPlot) jfreechart.getPlot();
@@ -105,7 +117,7 @@ public class Utils {
         //设置y轴坐标字体
         mValueAxis.setTickLabelFont(new Font("宋体", Font.PLAIN, 15));
         // 背景色 透明度
-        plot.setBackgroundAlpha(0.5f);
+        plot.setBackgroundAlpha(0);
         // 前景色 透明度
         plot.setForegroundAlpha(0.5f);
         // 其他设置 参考 CategoryPlot类
@@ -200,6 +212,7 @@ public class Utils {
             return compareTwoString(tags.get(0).getTag(),tags.get(tags.size()-1).getTag());
         }
     }
+
     public static String compareTwoString(String str1,String str2){
         int i =  0;
         while (i <str1.length() &&str1.charAt(i)==str2.charAt(i)){

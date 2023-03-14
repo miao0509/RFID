@@ -1,4 +1,4 @@
-package Test;
+package SAT;
 
 import Aloha.CreateTag;
 import Aloha.DataSet2SA;
@@ -12,10 +12,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SAT {
-    public static int dataSize = 1;  // 数据集大小
+    public static int dataSize = 500;  // 数据集大小
     public static int tagSize = 96;  // 标签长度
     public static int frameSize = 256; // 时隙数
-    public static int CT = 1000; // 每个值下做多少次实验
+    public static int CT = 1; // 每个值下做多少次实验
+    public static String name = " 帧长256"; // 每个值下做多少次实验
+
     public static void main(String[] args) {
 
         test1();
@@ -30,44 +32,43 @@ public class SAT {
             ArrayList<Long> traffic = new ArrayList<>();
             ArrayList<Long> takeTime = new ArrayList<>();
             ArrayList<Integer> tagNums = new ArrayList<>();
+            ArrayList<Integer> times = new ArrayList<>();
             DataSet2SA dataSet2SA_put = new DataSet2SA(trough_put, tagNums,traffic,takeTime);
             while (dataSize <= 500) {
                 int i = 0;
-                List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                 long start = System.currentTimeMillis();
                 Result sat = new Result();
                 while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
+                    List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                     Result satResult = SAT(dataSize, tagSize, frameSize, tags);
                     sat.efficiency += satResult.efficiency;
                     sat.traffic +=satResult.traffic;
+                    sat.time +=satResult.time;
                 }
                 trough_put.add(sat.efficiency/CT);
                 traffic.add((sat.traffic/CT)+8*256); //  SA寻找每个时隙的时候 要发送当前时隙数
+                times.add(sat.time/CT);
                 tagNums.add(dataSize);
-                if (dataSize == 1 ){
-                    dataSize+=9;
-                }else {
-                    dataSize+=10;
-                }
+                dataSize+=10;
                 long end = System.currentTimeMillis();
                 takeTime.add((end-start));
             }
             size = tagNums.size();
             map.put(frameSize, dataSet2SA_put);
             frameSize = frameSize *2;
-            dataSize = 1;
+            dataSize = 0;
         }
         long end = System.currentTimeMillis();
         System.out.println("SAT花费的时间：   " +  (end - start1));
         CategoryDataset dataset1 = Utils.createDoubleDataset(map, size,1);
         JFreeChart freeChart1 = Utils.createChart(dataset1, "SAT吞吐量", "标签数", "效率");
-        Utils.saveAsFile(freeChart1, Utils.jpgFilePath + "\\SAT吞吐量.jpg");
+        Utils.saveAsFile(freeChart1, Utils.jpgFilePath + "\\SAT吞吐量"+name+".jpg");
         CategoryDataset dataset2 = Utils.createDoubleDataset(map, size,2);
         JFreeChart freeChart2 = Utils.createChart(dataset2, "SAT通信量", "标签数", "通信量");
-        Utils.saveAsFile(freeChart2, Utils.jpgFilePath + "\\SAT通信量.jpg");
+        Utils.saveAsFile(freeChart2, Utils.jpgFilePath + "\\SAT通信量"+name+".jpg");
         CategoryDataset dataset3 = Utils.createDoubleDataset(map, size,3);
         JFreeChart freeChart3 = Utils.createChart(dataset3, "SAT耗时", "标签数", "耗时");
-        Utils.saveAsFile(freeChart3, Utils.jpgFilePath + "\\SAT耗时.jpg");
+        Utils.saveAsFile(freeChart3, Utils.jpgFilePath + "\\SAT耗时"+name+".jpg");
     }
 
     public static Result SAT(int dataSize, int tagSize, int frameSize, List<Tag> tags ) {
@@ -103,17 +104,17 @@ public class SAT {
                 case 1:// 识别成功
                     result.success++;
                     break;
-                default:/*
+                default:
                     signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
                     signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
-                    break;*/
-                    if (value.getPrefix0().size() == 1 &&value.getPrefix1().size() == 1){
+                    break;
+                    /*if (value.getPrefix0().size() == 1 &&value.getPrefix1().size() == 1){
                         result.success +=2; //改进的CT算法 如果只有一位碰撞 成功识别两个标签
                     }else {
                         signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
                         signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
                     }
-                    break;
+                    break;*/
             }
 //            System.out.println("    当前成功识别总数为：" + satResult.success);
         }

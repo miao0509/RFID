@@ -3,7 +3,7 @@ package Tree;
 import Aloha.CreateTag;
 import Aloha.DataSet2SA;
 import Aloha.Tag;
-import Test.Result;
+import SAT.Result;
 import Utils.Utils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -12,7 +12,7 @@ import java.util.*;
 
 public class ct {
     public static Map<String, List<Tag>> CT = new HashMap<>(); // 碰撞树  key->前缀    val->前缀下的子树
-    public static int dataSize = 1;  // 数据集大小
+    public static int dataSize = 0;  // 数据集大小
     public static Integer tagSize = 96;
     public static int frameSize = 64; // 时隙数
     public static int CTCount = 1000; // 每个值下做多少次实验
@@ -30,24 +30,24 @@ public class ct {
         ArrayList<Long> traffic = new ArrayList<>();
         ArrayList<Long> takeTime = new ArrayList<>();
         ArrayList<Integer> tagNums = new ArrayList<>();
+        ArrayList<Integer> times= new ArrayList<>();
         DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums,traffic,takeTime);
         while (dataSize <= 500) {
             long start = System.currentTimeMillis();
             int i = 0;
-            List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
             Result result = new Result();
             while (i++ < CTCount) { // 每个对应帧数下做CT次实验 取平均值
-                result.efficiency += CTProcess(tags, 0, tagSize).efficiency;
-                result.traffic +=CTProcess(tags, 0, tagSize).traffic;
+                List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
+                Result ctResult = CTProcess(tags, 0, tagSize);
+                result.efficiency +=ctResult.efficiency;
+                result.traffic +=ctResult.traffic;
+                result.time +=ctResult.time;
             }
             trough_put.add(result.efficiency / CTCount);
             traffic.add(result.traffic/CTCount);
+            times.add(result.time/CTCount);
             tagNums.add(dataSize);
-            if (dataSize == 1) {
-                dataSize += 9;
-            } else {
-                dataSize += 10;
-            }
+            dataSize += 10;
             long end = System.currentTimeMillis();
             takeTime.add((end-start));
         }
@@ -112,6 +112,7 @@ public class ct {
     }
 
     public static Result CTProcess(List<Tag> tags, int success, int tagSize) {
+        if (tags.size() == 0) return new Result();
         Result result = new Result();
         result.success = success;
         List<String> signlist = new ArrayList<String>();  // 前缀栈
@@ -133,17 +134,17 @@ public class ct {
                     result.success++;
                     break;
                 default:
-                    if (value.getPrefix0().size() == 1&&value.getPrefix1().size() == 1){
+                    /*if (value.getPrefix0().size() == 1&&value.getPrefix1().size() == 1){
                         success +=2; //改进的CT算法 如果只有一位碰撞 成功识别两个标签
                     }else {
                         signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
                         signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
                     }
+                    break;*/
+                    signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
+                    signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
                     break;
 
-                    /*signlist.add(0, Utils.commonPrefix(value.getPrefix0()));
-                    signlist.add(1, Utils.commonPrefix(value.getPrefix1()));
-                    break;*/
             }
 //            System.out.println("    当前成功识别总数为：" + success);
         }

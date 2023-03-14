@@ -8,6 +8,7 @@ import java.util.Map;
 public class SAProcess {
     public Map<Integer, List<Tag>> map;
     public int success;
+    public int time;
 
     public SAProcess() {
     }
@@ -15,6 +16,11 @@ public class SAProcess {
     public SAProcess(Map<Integer, List<Tag>> map, int success) {
         this.map = map;
         this.success = success;
+    }
+    public SAProcess(Map<Integer, List<Tag>> map, int success,int time) {
+        this.map = map;
+        this.success = success;
+        this.time = time;
     }
 
     public Map<Integer, List<Tag>> getMap() {

@@ -32,7 +32,7 @@ public class PureAloha extends JFrame {
         CategoryDataset dataset = Utils.createDoubleDataset(loads, through_put);
         JFreeChart freeChart = Utils.createChart(dataset, "纯ALOHA仿真", "装载", "效率");
         //这里我直接用的绝对路径
-        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\pureAloha.jpg");
+        Utils.saveAsFile(freeChart, Utils.jpgFilePath + "\\pureAloha23.jpg");
     }
 
     public static double next_interval(double load) {

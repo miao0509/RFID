@@ -10,9 +10,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SA {
-    public static int dataSize = 1;  // 数据集大小
-    public static int tagSize = 48;  // 标签长度
-    public static int frameSize = 64; // 时隙数
+    public static int dataSize = 0;  // 数据集大小
+    public static int tagSize = 96;  // 标签长度
+    public static int frameSize = 256; // 时隙数
     public static int CT = 1000; // 每个值下做多少次实验
 
 
@@ -22,33 +22,33 @@ public class SA {
         while (frameSize <=256) {  // 一帧大小
             ArrayList<Double> trough_put = new ArrayList<>();
             ArrayList<Integer> tagNums = new ArrayList<>();
+            ArrayList<Integer> times = new ArrayList<>();
+            ArrayList<Long> takeTime = new ArrayList<>();
             DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums,null,null);
             while (dataSize <= 500) {
+                long start = System.currentTimeMillis();
                 int i = 0;
                 double throughput = 0;
-                List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
+                int time = 0; //花费时隙数
                 while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
-                    int time = 0; //花费时隙数
-                    generateRandom(tags, frameSize);  //给标签写入随机数 用来在不同时隙响应
+                    List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                     SAProcess saProcess = SAProcess(tags);//  SA处理后的标签集
-                    for ( Map.Entry<Integer, List<Tag>> entry : saProcess.getMap().entrySet()) { // 遍历每个时隙的碰撞标签
-                        time+= ct.CTProcess(entry.getValue(), saProcess.getSuccess(),tagSize).time;
-                    }
-
+                    throughput += (double) saProcess.getSuccess()/frameSize;
+                    time += saProcess.time;
                 }
-
+                long end = System.currentTimeMillis();
+                takeTime.add(end-start);
+                times.add((time/CT));
                 trough_put.add(throughput/CT);
                 tagNums.add(dataSize);
-                if (dataSize == 1 ){
-                    dataSize+=9;
-                }else {
-                    dataSize+=10;
-                }
+
+                dataSize+=10;
+
             }
             size = tagNums.size();
             map.put(frameSize, dataSet2SA);
             frameSize = frameSize *2;
-            dataSize = 1;
+            dataSize = 0;
         }
         CategoryDataset dataset = Utils.createDoubleDataset(map, size,1);
 
@@ -72,16 +72,25 @@ public class SA {
 
     public static SAProcess SAProcess(List<Tag> tags) {  // 首先进行SA算法 把所有成功标签移除
         int success = 0;
-        Map<Integer, List<Tag>> map = tags.stream().collect(Collectors.groupingBy(Tag::getNum)); // 标签按时隙分组
-        Iterator<Map.Entry<Integer, List<Tag>>> iterator = map.entrySet().iterator();
-        while (iterator.hasNext()){
-            Map.Entry<Integer, List<Tag>> next = iterator.next();
-            if (next.getValue().size() == 1){
-                success++;
-                iterator.remove();
+        int count = tags.size();
+        int i = 0; // 花费多少帧识别完标签
+        long traffic = 0;
+        Map<Integer, List<Tag>> map = null; // 标签按时隙分组
+        while (success<count) {
+            i++;
+            generateRandom(tags, frameSize);  //给标签写入随机数 用来在不同时隙响应
+            map = tags.stream().collect(Collectors.groupingBy(Tag::getNum));
+            Iterator<Map.Entry<Integer, List<Tag>>> iterator = map.entrySet().iterator();
+            while (iterator.hasNext()){
+                Map.Entry<Integer, List<Tag>> next = iterator.next();
+                if (next.getValue().size() == 1){
+                    success++;
+                    iterator.remove();
+                    tags.remove(next.getValue().get(0));
+                }
             }
         }
-        return new SAProcess(map,success);
+        return new SAProcess(map,success,i*frameSize);
     }
 
 
