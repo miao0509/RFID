@@ -12,9 +12,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SAT {
-    public static int dataSize = 500;  // 数据集大小
-    public static int tagSize = 96;  // 标签长度
-    public static int frameSize = 256; // 时隙数
+    public static int dataSize = 14;  // 数据集大小
+    public static int tagSize = 6;  // 标签长度
+    public static int frameSize = 8; // 时隙数
     public static int CT = 1; // 每个值下做多少次实验
     public static String name = " 帧长256"; // 每个值下做多少次实验
 
@@ -27,14 +27,14 @@ public class SAT {
         long start1 = System.currentTimeMillis();
         Map<Integer, DataSet2SA> map= new HashMap<>(); // key-> 帧大小 val-> 吞吐量和标签数目
         int size = 0 ; // 图有多少个横坐标
-        while (frameSize <=256) {  // 一帧大小
+        while (frameSize <=8) {  // 一帧大小
             ArrayList<Double> trough_put = new ArrayList<>();
             ArrayList<Long> traffic = new ArrayList<>();
             ArrayList<Long> takeTime = new ArrayList<>();
             ArrayList<Integer> tagNums = new ArrayList<>();
             ArrayList<Integer> times = new ArrayList<>();
             DataSet2SA dataSet2SA_put = new DataSet2SA(trough_put, tagNums,traffic,takeTime);
-            while (dataSize <= 500) {
+            while (dataSize <= 14) {
                 int i = 0;
                 long start = System.currentTimeMillis();
                 Result sat = new Result();
@@ -89,13 +89,14 @@ public class SAT {
         List<String> signlist = new ArrayList<String>();  // 前缀栈
         String sign = "";// 二进制前缀
         CTResult value;//  返回值
-        signlist.add(tags.prefix); // 这里只能是 自己去判断公共前缀 否则都是10开头的  你给了“”  那么就进入了死循环
+        signlist.add(tags.prefix+"0"); // 这里只能是 自己去判断公共前缀 否则都是10开头的  你给了“”  那么就进入了死循环
+        signlist.add(tags.prefix+"1"); // 这里只能是 自己去判断公共前缀 否则都是10开头的  你给了“”  那么就进入了死循环
         //String commonPrefix = Utils.commonPrefix(tags.getTags());   // 公共前缀
         //signlist.add(commonPrefix);
-        while (signlist.size() > 0) {
+        while (tags.getTags().size() > 0 && signlist.size() >0) {
             sign = signlist.get(0);
             result.traffic +=sign.length();
-            value = ct.seek(sign, tags.getTags(), tagSize);
+            value = seek(sign, tags.getTags(), tagSize);
             result.time++;
             signlist.remove(sign);
             switch (value.getResult()) {
@@ -146,6 +147,40 @@ public class SAT {
         return new SATProcess(satMap,success);
 
     }
+
+    public static CTResult seek(String sign, List<Tag> list, int tagSize) {
+        CTResult result;
+        int count = 0;
+        Tag first = new Tag();
+        List<Tag> collection0 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+0）
+        List<Tag> collection1 = new ArrayList<>();//碰撞标签 有共同的前缀（sign+1）
+        for (int i = 0; i < list.size(); i++) {
+            if (sign.length() == tagSize ) {
+//                System.out.print("发出信号为 " + sign + "  识别成功");
+                list.remove(list.get(i));
+                return new CTResult(1);
+            }
+            if (list.get(i).getTag().startsWith(sign)){
+                count++;
+
+            }
+            if (list.get(i).getTag().startsWith(sign + 0)) {
+                collection0.add(list.get(i));
+            } else if (list.get(i).getTag().startsWith(sign + 1)) {
+                collection1.add(list.get(i));
+            }
+        }
+        if (count == 1){
+            list.remove(first);
+            return new CTResult(1);
+        }
+
+        result = new CTResult(2, collection0, collection1);
+//        System.out.print("发出信号为 " + sign + "  冲突个数" + (collection1.size() + collection0.size()));
+
+        return result;
+    }
+
     public static SATProcess SAProcess1(List<Tag> tags) {  // 首先进行SA算法 把所有成功标签移除
         int success = 0;
         Map<Integer, List<Tag>> map = tags.stream().collect(Collectors.groupingBy(Tag::getNum)); // 标签按时隙分组
@@ -163,5 +198,4 @@ public class SAT {
         return new SATProcess(satMap,success);
 
     }
-
 }

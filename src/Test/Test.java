@@ -1,6 +1,9 @@
 package Test;
 
+import Aloha.CreateTag;
+import Aloha.Tag;
 import Tree.GBAQT;
+import Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +13,9 @@ public class Test {
 
 
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("000110");
-        list.add("000101");
-        list.add("000011");
-        list.add("011111");
-        list.add("011010");
-        list.add("111111");
-        GBAQT.process(list);
+        List<Tag> tags = CreateTag.createTags(3, 4);
+        String s = Utils.commonPrefix2(tags);
+        System.out.println(tags);
+        System.out.println(s);
     }
 }

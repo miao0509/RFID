@@ -29,7 +29,7 @@ public class A4PQT {
             while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
                 List<String> tags = Utils.createTags(dataSize, tagSize);
                 ; // 每次创建不同的标签值（标签数量  标签长度）
-                Result result = process(tags);
+                Result result =BMQT.process(tags);
                 AdaptTree.efficiency += result.efficiency;
                 AdaptTree.traffic += result.traffic;
                 AdaptTree.time += result.time;
@@ -92,7 +92,7 @@ public class A4PQT {
                 break;
             }
         }
-        //System.out.println("识别次数为" + result.time + "次，标签总数为：" + result.success + "  识别完成！");
+        System.out.println("识别次数为" + result.time + "次，标签总数为：" + result.success + "  识别完成！");
         result.efficiency = (double) result.success / result.time;
         return result;
     }
@@ -107,6 +107,12 @@ public class A4PQT {
         int value = 0;
         String first = "";// 记录识别出第一个标签的id;
         for (int i = 0; i < list.size(); i++) {
+            if (sign.equals(list.get(i))){
+                list.remove(first);
+                value = 1;
+                values[0] = String.valueOf(value);
+                return values;
+            }
             if (list.get(i).startsWith(sign)) {
                 count++;
                 // 统计引起冲突的位
@@ -148,10 +154,13 @@ public class A4PQT {
                 values[len] = "11";
             } else {
                 //System.out.print("碰撞位: ");
-                for (String s : collisionSet) {
+
                     //System.out.print(s + "    ");
-                    values[len++] = s;
-                }
+                values[len++] = "01";
+                values[len++] = "10";
+                values[len++] = "11";
+                values[len] = "00";
+
             }
         }
         values[0] = String.valueOf(value);

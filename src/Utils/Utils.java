@@ -220,4 +220,36 @@ public class Utils {
         }
         return str1.substring(0,i);
     }
+    public static String commonPrefix2(List<Tag> tags){
+        if (tags.isEmpty()){
+            return "";
+        }else if (tags.size()==1){
+            return tags.get(0).getTag();
+        }else {
+            tags.sort(Comparator.comparing(Tag::getTag));
+            return compareTwoString2(tags.get(0).getTag(),tags.get(tags.size()-1).getTag());
+        }
+    }
+    public static String compareTwoString2(String str1,String str2){
+        int i =  0;
+        int count = 0;
+        int j= 0,k = 0;
+        while (i <str1.length()){
+            if (str1.charAt(i)!=str2.charAt(i) ){
+                count++;
+                if (count == 1) j = i;
+                if (count == 2) k = i;
+            }
+            i++;
+            if (count == 2) break;
+        }
+        String s = str1.substring(0, i);
+        char[] chars = s.toCharArray();
+        chars[j] = 'x';
+        chars[k] = 'x';
+        return String.valueOf(chars);
+    }
+
+
+
 }
