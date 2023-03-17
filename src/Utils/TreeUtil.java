@@ -39,12 +39,40 @@ public class TreeUtil {
                 if (count == 2) k = i;
             }
             i++;
-            if (count == 2) break;
+            if (count == 3) break;
         }
         String s = str1.substring(0, i);
         char[] chars = s.toCharArray();
         chars[j] = 'x';
         chars[k] = 'x';
         return String.valueOf(chars);
+    }
+    public static String getMergedString(List<String> strs) {
+        if (strs == null || strs.size() == 0) {
+            return "";
+        }
+        int count = 0;
+        StringBuilder result = new StringBuilder();
+        int len = strs.get(0).length();
+        for (int i = 0; i < len; i++) {
+            char c = strs.get(0).charAt(i);
+            for (int j = 1; j < strs.size(); j++) {
+                if (strs.get(j).charAt(i) != c) {
+                    c = 'X';
+                    count++;
+                    break;
+                }
+            }
+            result.append(c);
+            if (count == 3){
+                break;
+            }
+        }
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        int i  = 3;
+        System.out.println(Integer.toBinaryString(i));
     }
 }
