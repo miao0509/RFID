@@ -9,26 +9,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Test {
+public class HMQT {
     public static void main(String[] args) {
-//        List<String> list = new ArrayList<>();
-//        list.add("000110");
-//        list.add("101001");
-//        list.add("011011");
-//        list.add("111110");
-//        list.add("110111");
-//        list.add("101101");
-        List<String> list = Utils.createTags(500, 96);
-        String[] tags = {"0000", "0001", "0010"};
+        List<String> list = Utils.createTags(1000, 96);
         List<String> list1 = new ArrayList<>(list);
         process(list);
-//        A4PQT.process(list1);
     }
 
     public static Result process(List<String> list) {
         List<BMQTTag> tags = new ArrayList<>();
         for (String s : list) {
-            tags.add(new BMQTTag(s, 0, 0));
+            tags.add(new BMQTTag(s, 0, ""));
         }
         List<String> signlist = new ArrayList<String>();
         String sign = "";// 二进制前缀
@@ -53,36 +44,64 @@ public class Test {
             }
             String commonPrefix = TreeUtil.getMergedString(response.stream().map(BMQTTag::getID).collect(Collectors.toList()));
             int x = countCollision(commonPrefix);
-            if (x == 1) {//只有一位 自动识别
-                AutoIdentify(list, commonPrefix);
-                result.success += 2;
-            } else if (x == 2) {  //两位碰撞  根据异或分组
-                int detect = Detect(response, commonPrefix);
-                int[] ints = find(commonPrefix);
-                char[] chars = commonPrefix.toCharArray();
-                if (detect == -1) {
-                    chars[ints[0]] = '0';chars[ints[1]] = '0';
-                    signlist.add(String.valueOf(chars));
-                    chars[ints[0]] = '0';chars[ints[1]] = '1';
-                    signlist.add(String.valueOf(chars));
-                    chars[ints[0]] = '1';chars[ints[1]] = '0';
-                    signlist.add(String.valueOf(chars));
-                    chars[ints[0]] = '1';chars[ints[1]] = '1';
-                    signlist.add(String.valueOf(chars));
-                }else if (detect == 0){
-                    chars[ints[0]] = '0';chars[ints[1]] = '0';
-                   list.remove(String.valueOf(chars));
-                    chars[ints[0]] = '1';chars[ints[1]] = '1';
-                    list.remove(String.valueOf(chars));
-                }else {
-                    chars[ints[0]] = '1';chars[ints[1]] = '0';
-                    list.remove(String.valueOf(chars));
-                    chars[ints[0]] = '0';chars[ints[1]] = '1';
-                    list.remove(String.valueOf(chars));
-                }
-            }else if (x == 3){
+            if(x >=3) {
                 hmProcess(commonPrefix,signlist,response,result);
             }
+            else {
+                int[] ints = find(commonPrefix);
+                char[] chars = commonPrefix.toCharArray();
+                chars[ints[0]] = '0';
+                signlist.add(String.valueOf(chars).substring(0,ints[0]+1));
+                chars[ints[0]] = '1';
+                signlist.add(String.valueOf(chars).substring(0,ints[0]+1));
+            }
+//            if (x == 1) {//只有一位 自动识别
+//                AutoIdentify(list, commonPrefix);
+//                result.success += 2;
+//
+//            } else if (x == 2) {  //两位碰撞  根据异或分组
+//                int detect = Detect(response, commonPrefix);
+//                int[] ints = find(commonPrefix);
+//                char[] chars = commonPrefix.toCharArray();
+//                if (detect == -1) {
+//                    chars[ints[0]] = '0';
+//                    chars[ints[1]] = '0';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                    chars[ints[0]] = '0';
+//                    chars[ints[1]] = '1';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                    chars[ints[0]] = '1';
+//                    chars[ints[1]] = '0';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                    chars[ints[0]] = '1';
+//                    chars[ints[1]] = '1';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                } else if (detect == 0) {
+//                    chars[ints[0]] = '0';
+//                    chars[ints[1]] = '0';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                    chars[ints[0]] = '1';
+//                    chars[ints[1]] = '1';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                } else {
+//                    chars[ints[0]] = '1';
+//                    chars[ints[1]] = '0';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                    chars[ints[0]] = '0';
+//                    chars[ints[1]] = '1';
+//                    signlist.add(String.valueOf(chars).substring(0, ints[1] + 1));
+//                }
+//            }else {
+//                hmProcess(commonPrefix,signlist,response,result);
+//            }
+//            else {
+//                int[] ints = find(commonPrefix);
+//                char[] chars = commonPrefix.toCharArray();
+//                chars[ints[0]] = '0';
+//                signlist.add(String.valueOf(chars).substring(0,ints[0]+1));
+//                chars[ints[0]] = '1';
+//                signlist.add(String.valueOf(chars).substring(0,ints[0]+1));
+//            }
         }
         System.out.println("识别次数为" + result.time + "次，标签总数为：" + result.success + "  识别完成！");
         result.efficiency = (double) result.success / result.time;
@@ -99,146 +118,146 @@ public class Test {
         if (collisionNum == 0){
             if (hm.get(0) == "0010"){
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (hm.get(0) == "0100"){
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }
         }else if (collisionNum == 2){
             if (detectHMWeight.equals("00XX")){
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             } else if (detectHMWeight.equals("0X0X")) {
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (detectHMWeight.equals("X00X")) {
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (detectHMWeight.equals("0XX0")) {
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (detectHMWeight.equals("X0X0")) {
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (detectHMWeight.equals("XX00")) {
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }
         }else if (collisionNum ==3){
             if (detectHMWeight.equals("XXX0")){
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             } else if (detectHMWeight.equals("XX0X")) {
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (detectHMWeight.equals("X0XX")) {
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }else if (detectHMWeight.equals("0XXX")) {
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
                 array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-                signlist.add(String.valueOf(array));
+                signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             }
         }else {
             array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '0';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '0';array[ints[1]] = '0';array[ints[2]] = '1';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '0';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '0';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '0';array[ints[1]] = '1';array[ints[2]] = '1';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '0';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '1';array[ints[1]] = '0';array[ints[2]] = '1';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
             array[ints[0]] = '1';array[ints[1]] = '1';array[ints[2]] = '1';
-            signlist.add(String.valueOf(array));
+            signlist.add(String.valueOf(array).substring(0,ints[2]+1));
         }
     }
     public static String detectHMWeight(List<String> strs) {
@@ -268,16 +287,16 @@ public class Test {
         Set<String> ans = new HashSet<>();
         for (BMQTTag tag : response) {
             int hmWeight = tag.ID.charAt(ints[0])+tag.ID.charAt(ints[1])+tag.ID.charAt(ints[2])-3* (int)'0';
-            tag.HMWeight = hmWeight;
-            if (hmWeight == 0){
-                ans.add("0001");
-            }else if (hmWeight == 1){
-                ans.add("0010");
-            }else if (hmWeight == 2){
-                ans.add("0100");
-            }else {
-                ans.add("1000");
-            }
+//            tag.HMWeight = hmWeight;
+//            if (hmWeight == 0){
+//                ans.add("0001");
+//            }else if (hmWeight == 1){
+//                ans.add("0010");
+//            }else if (hmWeight == 2){
+//                ans.add("0100");
+//            }else {
+//                ans.add("1000");
+//            }
         }
         return ans;
     }
@@ -357,6 +376,7 @@ public class Test {
         for (int i = 0; i < commonPrefix.length(); i++) {
             if (commonPrefix.charAt(i) == 'X') {
                 ans[count++] = i;
+                if (count == 3) break;
             }
         }
         return ans;

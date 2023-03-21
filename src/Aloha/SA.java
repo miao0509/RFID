@@ -23,6 +23,7 @@ public class SA {
             ArrayList<Double> trough_put = new ArrayList<>();
             ArrayList<Integer> tagNums = new ArrayList<>();
             ArrayList<Integer> times = new ArrayList<>();
+            ArrayList<Integer> IdleTimes = new ArrayList<>();
             ArrayList<Long> takeTime = new ArrayList<>();
             DataSet2SA dataSet2SA = new DataSet2SA(trough_put, tagNums,null,null);
             while (dataSize <= 500) {
@@ -30,17 +31,20 @@ public class SA {
                 int i = 0;
                 double throughput = 0;
                 int time = 0; //花费时隙数
+                int idleTime = 0;
                 while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
                     List<Tag> tags = CreateTag.createTags(dataSize, tagSize); // 每次创建不同的标签值（标签数量  标签长度）
                     SAProcess saProcess = SAProcess(tags);//  SA处理后的标签集
                     throughput += (double) saProcess.getSuccess()/frameSize;
                     time += saProcess.time;
+                    idleTime += saProcess.idleTime;
                 }
                 long end = System.currentTimeMillis();
                 takeTime.add(end-start);
                 times.add((time/CT));
                 trough_put.add(throughput/CT);
                 tagNums.add(dataSize);
+                IdleTimes.add(idleTime);
 
                 dataSize+=10;
 
@@ -75,11 +79,13 @@ public class SA {
         int count = tags.size();
         int i = 0; // 花费多少帧识别完标签
         long traffic = 0;
+        int idleTime = 0;
         Map<Integer, List<Tag>> map = null; // 标签按时隙分组
         while (success<count) {
             i++;
             generateRandom(tags, frameSize);  //给标签写入随机数 用来在不同时隙响应
             map = tags.stream().collect(Collectors.groupingBy(Tag::getNum));
+            idleTime+=frameSize-map.size();
             Iterator<Map.Entry<Integer, List<Tag>>> iterator = map.entrySet().iterator();
             while (iterator.hasNext()){
                 Map.Entry<Integer, List<Tag>> next = iterator.next();
@@ -90,7 +96,7 @@ public class SA {
                 }
             }
         }
-        return new SAProcess(map,success,i*frameSize);
+        return new SAProcess(map,success,i*frameSize,idleTime);
     }
 
 

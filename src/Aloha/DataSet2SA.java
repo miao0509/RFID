@@ -7,6 +7,8 @@ public class DataSet2SA {
     ArrayList<Integer> TagNums;
     ArrayList<Long> traffic;
     ArrayList<Long> takeTime;
+    ArrayList<Integer> Idle;//空闲时隙数
+    ArrayList<Integer> time;//总时隙数
 
     public DataSet2SA(ArrayList<Double> trough_put, ArrayList<Integer> TagNums,ArrayList<Long> traffic,ArrayList<Long> takeTime) {
         this.trough_put = trough_put;
@@ -45,5 +47,21 @@ public class DataSet2SA {
 
     public void setTagNums(ArrayList<Integer> tagNums) {
         this.TagNums = tagNums;
+    }
+
+    public ArrayList<Integer> getIdle() {
+        return Idle;
+    }
+
+    public void setIdle(ArrayList<Integer> idle) {
+        Idle = idle;
+    }
+
+    public ArrayList<Integer> getTime() {
+        return time;
+    }
+
+    public void setTime(ArrayList<Integer> time) {
+        this.time = time;
     }
 }

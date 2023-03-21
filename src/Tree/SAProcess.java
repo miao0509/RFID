@@ -9,6 +9,7 @@ public class SAProcess {
     public Map<Integer, List<Tag>> map;
     public int success;
     public int time;
+    public int idleTime;
 
     public SAProcess() {
     }
@@ -21,6 +22,12 @@ public class SAProcess {
         this.map = map;
         this.success = success;
         this.time = time;
+    }
+    public SAProcess(Map<Integer, List<Tag>> map, int success,int time,int IdleTime) {
+        this.map = map;
+        this.success = success;
+        this.time = time;
+        this.idleTime = IdleTime;
     }
 
     public Map<Integer, List<Tag>> getMap() {

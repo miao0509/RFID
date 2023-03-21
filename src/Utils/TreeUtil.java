@@ -64,9 +64,6 @@ public class TreeUtil {
                 }
             }
             result.append(c);
-            if (count == 3){
-                break;
-            }
         }
         return result.toString();
     }
