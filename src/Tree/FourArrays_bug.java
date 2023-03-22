@@ -1,12 +1,13 @@
 package Tree;
 
 import SAT.Result;
-import Utils.*;
+import Utils.TreeUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class FourArrays {
+public class FourArrays_bug {
     public static void main(String[] args) {
 //        List<String> list = Utils.createTags(5, 6);
         List<String> list = new ArrayList<>();
@@ -22,7 +23,7 @@ public class FourArrays {
         list.add("001110");
         process(list);
     }
-
+//[0.0, 0.6177211410880138, 0.6053986909354803, 0.6053303136343597, 0.6060487641195759, 0.606272767117578, 0.6031637278024281, 0.6004413130100468, 0.6053711744921231, 0.6017803550932752, 0.6025003767464017, 0.6018718206002991, 0.6036409732941163, 0.6027201496170151, 0.6009544476139407, 0.6034947729464046, 0.6017741600067512, 0.601783834248787, 0.6002739074968955, 0.6016406476178249, 0.6008194432690099, 0.6011846253183813, 0.601977744205282, 0.600439188472704, 0.6013765444655496, 0.6012475731340335, 0.6019598712213591, 0.6004695332884777, 0.6016813682838031, 0.6018426373831683, 0.5999947083370121, 0.6017514038016099, 0.6015868598373229, 0.6009171129278128, 0.6016472563868213, 0.6003103983265365, 0.6015124179081662, 0.6012533640643979, 0.6008183241839816, 0.6013038237688655, 0.6007551113779851, 0.6013409147486992, 0.6017869529101949, 0.6013658784463773, 0.6007407568206232, 0.6009367359194787, 0.6016281162064611, 0.6006359046247983, 0.601546851744063, 0.6011514990733479, 0.6009942256837196]
     public static Result process(List<String> list) {
         List<BMQTTag> tags = new ArrayList<>();
         for (String s : list) {
@@ -52,25 +53,15 @@ public class FourArrays {
             result.collision++;
             // 每次识别两位
             String commonPrefix = TreeUtil.getMergedString(response.stream().map(BMQTTag::getID).collect(Collectors.toList()));
-            int xpos = find(commonPrefix);
+            int[] xpos = find(commonPrefix);
             int x = countCollision(commonPrefix);
-            if (xpos != commonPrefix.length() - 1) {
-                x = commonPrefix.charAt(xpos + 1) == 'X' ? 2 : x;
-            }
-            int end = xpos == commonPrefix.length() - 1 ? xpos + 1 : xpos + 2;
             if (x == 1) {
                 char[] chars = commonPrefix.toCharArray();
-                chars[xpos] = '0';
+                chars[xpos[0]] = '0';
                 list.remove(String.valueOf(chars).substring(0, 96));
-                chars[xpos] = '1';
+                chars[xpos[0]] = '1';
                 list.remove(String.valueOf(chars).substring(0, 96));
                 result.success += 2;
-            } else if (commonPrefix.charAt(xpos+1) !='X') {
-                char[] chars = commonPrefix.toCharArray();
-                chars[xpos] = '0';
-                signlist.add(String.valueOf(chars).substring(0, end));
-                chars[xpos] = '1';
-                signlist.add(String.valueOf(chars).substring(0, end));
             } else {  //两位碰撞  根据异或分组
                 detect(sign, tags, xpos);
 //                result.time++;
@@ -79,52 +70,52 @@ public class FourArrays {
                 int or = or(response);
                 char[] chars = commonPrefix.toCharArray();
                 if (detect == 0) {
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
                 } else if (detect == 1) {
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
                 } else if (and == 0) {
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
                 } else if (or == 1) {
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
                 } else {
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '1';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '1';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
-                    chars[xpos] = '0';
-                    chars[xpos + 1] = '0';
-                    signlist.add(String.valueOf(chars).substring(0, end));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '1';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '1';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
+                    chars[xpos[0]] = '0';
+                    chars[xpos[1]] = '0';
+                    signlist.add(String.valueOf(chars).substring(0, xpos[1]+1));
                 }
             }
         }
@@ -153,6 +144,7 @@ public class FourArrays {
             if (commonPrefix.charAt(i) == 'X') {
                 count++;
             }
+            if (count == 2) break;
         }
         return count;
     }
@@ -181,7 +173,7 @@ public class FourArrays {
         return response;
     }
 
-    public static List<BMQTTag> detect(String sign, List<BMQTTag> list, int xpos) {
+    public static List<BMQTTag> detect(String sign, List<BMQTTag> list, int[] xpos) {
         List<BMQTTag> response = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             BMQTTag tag = list.get(i);
@@ -189,9 +181,9 @@ public class FourArrays {
                 response.add(tag);
             }
             if (tag.ID.length() - sign.length() >= 2) {
-                tag.and = (tag.ID.charAt(xpos + 1) - '0') & ((tag.ID.charAt(xpos)) - '0');
-                tag.or = ((tag.ID.charAt(xpos + 1) - '0') | (tag.ID.charAt(xpos)) - '0');
-                tag.detect = ((tag.ID.charAt(xpos + 1) - '0') == (tag.ID.charAt(xpos) - '0')) ? 0 : 1;
+                tag.and = (tag.ID.charAt(xpos[1]) - '0') & ((tag.ID.charAt(xpos[0])) - '0');
+                tag.or = ((tag.ID.charAt(xpos[1]) - '0') | (tag.ID.charAt(xpos[0])) - '0');
+                tag.detect = ((tag.ID.charAt(xpos[1]) - '0') == (tag.ID.charAt(xpos[0]) - '0')) ? 0 : 1;
             }
         }
         return response;
@@ -234,15 +226,16 @@ public class FourArrays {
      * @param commonPrefix
      * @return
      */
-    public static int find(String commonPrefix) {
+    public static int[] find(String commonPrefix) {
+        int[] ans = new int[2];
         int count = 0;
         for (int i = 0; i < commonPrefix.length(); i++) {
             if (commonPrefix.charAt(i) == 'X') {
-                count = i;
-                break;
+                ans[count++] = i;
+                if (count == 2 ) break;
             }
         }
-        return count;
+        return ans;
 
     }
 
