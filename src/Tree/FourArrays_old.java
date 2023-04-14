@@ -6,25 +6,19 @@ import Utils.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 按照QT算法 每次只访问连续两位
+ */
 public class FourArrays_old {
     public static void main(String[] args) {
-        List<String> list = Utils.createTags(8, 6);
-        System.out.println(list);
-        list.clear();;
-        list.add("000111");
-        list.add("000100");
-        list.add("011111");
-        list.add("110011");
-        list.add("101100");
-        list.add("100101");
-        list.add("111000");
-        list.add("001000");
-        List<String> list1  = new ArrayList<>(list);
+        List<String> list = Utils.createTags(500, 96);
         process(list);
-        FourArrays.process(list1);
+
     }
-//[0.0, 0.6087802840434419, 0.6039918336296669, 0.5990452339580576, 0.6006214340945685, 0.5972005999286989, 0.5969304527202035, 0.5988573495964938, 0.5977000546353224, 0.5973682339430025, 0.5966732527889966, 0.5973095282884944, 0.5992771749035346, 0.596854771410247, 0.5964306923218939, 0.5977322006325823, 0.597835980858047, 0.5984640754333986, 0.5964903163947963, 0.5980401708370509, 0.5961084985145816, 0.5961852891653543, 0.5956539858073229, 0.59580958682299, 0.5958454745866543, 0.5960420579109603, 0.5953923904202402, 0.5951534470854981, 0.5955945087375146, 0.595698438060213, 0.5955706117114845, 0.5960077320508833, 0.5953854838146387, 0.5957852208434358, 0.5971062158174196, 0.5963420195974953, 0.595547850124843, 0.5972215284227431, 0.5966218963133199, 0.5963509021715853, 0.5968457388783786, 0.5959061133615043, 0.5966934748975543, 0.5967310234070208, 0.5958921150188992, 0.5955815012893523, 0.5965758334378322, 0.5964030774558866, 0.59601653327725, 0.5968678101507495, 0.5960657808820089]
+    //[0.0, 0.5752743211779388, 0.5651091349309286, 0.5649251811301343, 0.5622741588370629, 0.5625462218607755, 0.5611233400055786, 0.5611441892473813, 0.5608037765938665, 0.5611255452928836, 0.5603774486891521, 0.5614042005365942, 0.560781751390328, 0.5617335488221484, 0.562088349636401, 0.5605959901955305, 0.5609332933183604, 0.5604588956937033, 0.5595305980250785, 0.5597392438596711, 0.5600204072526803, 0.5594574037780188, 0.5598383158944517, 0.5604168969703457, 0.5597940224587992, 0.5599430095675122, 0.5598400896368276, 0.5599138325493416, 0.5596487751540826, 0.5599518793672477, 0.5599068659052235, 0.5600763030281001, 0.5597969318940563, 0.5596416094307128, 0.5600956280847228, 0.5596155101467494, 0.5597541093742506, 0.5602975043424165, 0.560104368552607, 0.5599632388045332, 0.5596397712653629, 0.559956041696005, 0.5600070165299367, 0.5601161092175099, 0.5600836505376204, 0.560084593165998, 0.5594377086730666, 0.5599756088556113, 0.5597941100926279, 0.5601889119252322, 0.5601645639462772]
+
     public static Result process(List<String> list) {
+        int a = 0,b=0,c=0,d=0,e=0,f=0,maxLength = 0;
         List<BMQTTag> tags = new ArrayList<>();
         for (String s : list) {
             tags.add(new BMQTTag(s, 0, ""));
@@ -37,11 +31,13 @@ public class FourArrays_old {
         //System.out.println(list);
         while (signlist.size() > 0) {
             sign = signlist.get(0);
+            maxLength = Math.max(sign.length(),maxLength);
             result.traffic += sign.length();
             response = seek(sign, tags);
             result.time++;
             signlist.remove(sign);
             if (response.size() == 0) {
+                d++;
                 result.idle++;
                 continue;
             }
@@ -56,9 +52,11 @@ public class FourArrays_old {
                     .substring(sign.length(), sign.length()+2);
             int x = countCollision(commonPrefix);
             if (x == 0) {
+                f++;
                 signlist.add(sign + commonPrefix);
             }
             if (x == 1) {
+                e++;
                 int[] ints = find(commonPrefix);
                 char[] chars = commonPrefix.toCharArray();
                 chars[ints[0]] = '0';
@@ -70,22 +68,28 @@ public class FourArrays_old {
                 int and = and(response);
                 int or = or(response);
                 if (detect == 0) {
+                    a++;
                     signlist.add(sign+"00");
                     signlist.add(sign+"11");
-                } else if (detect == 1) {
+                }
+                else if (detect == 1) {
+                    a++;
                     signlist.add(sign+"01");
                     signlist.add(sign+"10");
                 }
                 else if (and == 0){
+                    b++;
                     signlist.add(sign+"01");
                     signlist.add(sign+"10");
                     signlist.add(sign+"00");
                 } else if (or ==1) {
+                    b++;
                     signlist.add(sign+"01");
                     signlist.add(sign+"10");
                     signlist.add(sign+"11");
                 }
                 else {
+                    c++;
                     signlist.add(sign+"01");
                     signlist.add(sign+"10");
                     signlist.add(sign+"11");
@@ -93,7 +97,9 @@ public class FourArrays_old {
                 }
             }
         }
+        System.out.println(maxLength);
         System.out.println("识别次数为" + result.time + "次，标签总数为：" + result.success + "  识别完成！");
+        System.out.println("a= "+a + "b= "+b+"c= "+c+"d= "+d+"e= "+e+"f= "+f);
         result.efficiency = (double) result.success / result.time;
         return result;
     }

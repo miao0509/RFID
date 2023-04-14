@@ -14,7 +14,7 @@ import java.util.Map;
 public class TreeTest {
     public static int dataSize = 0;  // 数据集大小
     public static int tagSize = 96;  // 标签长度
-    public static int CT = 100; // 每个值下做多少次实验
+    public static int CT = 1000; // 每个值下做多少次实验
     public static String title = "FourArrays";
 
     public static void main(String[] args) {
@@ -35,7 +35,7 @@ public class TreeTest {
             Result AdaptTree = new Result();
             while (i++ < CT) { // 每个对应帧数下做CT次实验 取平均值
                 List<String> tags = Utils.createTags(dataSize, tagSize);
-                Result result = FourArrays.process(tags);
+                Result result = FourArrays_old.process(tags);
                 AdaptTree.efficiency += result.efficiency;
                 AdaptTree.traffic += result.traffic;
                 AdaptTree.time += result.time;

@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class qt {
     public static void main(String[] args) {
-        List<String> tags = Utils.createTags(5, 6);
+        List<String> tags = Utils.createTags(10, 96);
         process(tags);
     }
 
@@ -42,7 +42,7 @@ public class qt {
                     result.collision++;
                     break;
             }
-//            System.out.println("    当前成功识别总数为：" + result.success);
+            System.out.println("    当前成功识别总数为：" + result.success);
         }
         result.efficiency = (double)result.success / result.time;
         return result;
@@ -61,14 +61,14 @@ public class qt {
             }
         }
         if (count == 0) {
-//            System.out.print("发出信号为 " + sign + "  无响应");
+            System.out.print("发出信号为 " + sign + "  无响应");
         } else if (count == 1) {
-//            System.out.print("发出信号为 " + sign + "  识别成功");
+            System.out.print("发出信号为 " + sign + "  识别成功");
             list.remove(first);
             value = 1;
         } else {
             value = 2;
-//            System.out.print("发出信号为 " + sign + "  冲突个数" + count);
+            System.out.print("发出信号为 " + sign + "  冲突个数" + count);
         }
         return value;
     }
